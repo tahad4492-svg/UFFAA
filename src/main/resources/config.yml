@@ -1,0 +1,164 @@
+# MrTahaDarvish's UnstableFFA - config
+# Messages use MiniMessage format: https://docs.advntr.dev/minimessage/format.html
+
+config-version: 4
+
+prefix: "<red><bold>UnstableFFA</bold> <dark_gray>» <gray>"
+
+coins:
+  per-kill: 2        # coins a player earns for each kill
+  starting: 0        # coins a brand new player starts with
+
+lobby:
+  teleport-on-join: true     # send players to the lobby when they join
+  give-kit-selector: true    # give the nether star that opens the kit menu
+
+arena:
+  # every this many minutes the map resets; a portal with several arenas then moves to the next arena
+  reset-interval-minutes: 15
+  # seconds-before-reset at which players in the arena are warned
+  reset-warnings: [60, 30, 10, 5, 4, 3, 2, 1]
+  # how many blocks are put back per tick while a map resets (lower = less lag)
+  blocks-restored-per-tick: 4000
+  # move everyone in the arena to the lobby right before the map resets
+  send-players-to-lobby-on-reset: true
+  # seconds of damage immunity after entering an arena (ends early if you attack)
+  spawn-protection-seconds: 3
+  # skip the death screen and respawn straight in the lobby
+  auto-respawn: true
+  # stop players opening chests/furnaces/etc. in arenas (their contents can't be restored)
+  # shulker boxes are always allowed (open, fill, empty, place, break)
+  block-containers: true
+  # entity types removed from the arena world on every reset
+  # (remove END_CRYSTAL from this list if your map has decorative crystals)
+  remove-entities-on-reset:
+    - ITEM
+    - EXPERIENCE_ORB
+    - TNT
+    - FALLING_BLOCK
+    - ARROW
+    - SPECTRAL_ARROW
+    - TRIDENT
+    - ENDER_PEARL
+    - AREA_EFFECT_CLOUD
+    - END_CRYSTAL
+    - WIND_CHARGE
+    - BREEZE_WIND_CHARGE
+    - FIREBALL
+    - SMALL_FIREBALL
+    - SNOWBALL
+    - EGG
+    - SPLASH_POTION
+    - LINGERING_POTION
+
+shop:
+  title: "<dark_gray>Shop"     # title of the main /shop menu (MiniMessage)
+
+scoreboard:
+  enabled: true
+  title: "<red><bold>UnstableFFA"
+  # what "Active Players" counts: "arena" = players fighting in arenas, "online" = everyone online
+  active-players: arena
+
+hologram:
+  enabled: true     # floating text above portals (arena name, active players, countdown) and the optional leaderboard
+
+titles:
+  show-in-chat: true    # shop titles are shown in front of the player's name in chat
+  # true  = a player wearing a title shows as "Title Username » message" - the rank prefix from LuckPerms / your chat plugin is NOT shown for them
+  # false = the title is only added in front of whatever your chat plugin builds (rank prefix included)
+  # players without a title always keep your normal chat format
+  replace-rank-prefix: true
+  # also show the title in front of the name in the tab list (works with the TAB plugin and without it)
+  show-in-tab: true
+
+# ---------------------------------------------------------------------------------------------
+# Kill streaks and bounties
+#  - every kill in a row (no death, no leaving the arena) adds to your streak
+#  - every "step" kills you hit a milestone: announcement, title, sound and a coin bonus
+#  - from the first milestone on there is a bounty on your head; whoever ends your streak collects it
+# Message placeholders: {player} {streak} {bounty}   (claimed/shutdown messages: {killer} {victim} {streak} {bounty})
+# Messages use MiniMessage. One message of each list is picked at random, so add as many as you like.
+# Sounds are Minecraft sound keys, e.g. entity.wither.spawn
+# ---------------------------------------------------------------------------------------------
+bounty:
+  enabled: true
+  step: 5                    # kills between milestones (and the streak at which the bounty starts)
+  coins-per-step: 10         # bounty = (streak / step) * this   -> 5 kills = 10 coins, 10 kills = 20 coins ...
+  milestone-coins: 5         # coins the streaker gets at each milestone = (streak / step) * this
+  shutdown-min-streak: 3     # ending a streak this long (or longer) is announced
+  broadcast: all             # all = everyone online sees the messages, arena = only players inside arenas
+  claim-sound: entity.experience_orb.pickup
+
+  # ending someone's streak when there WAS a bounty on them
+  claimed-messages:
+    - "<green><bold>{killer}</bold> <gray>ended <red>{victim}<gray>'s <white>{streak}-kill <gray>streak and cashed in <yellow>{bounty} coins<gray>!"
+    - "<gold>BOUNTY CLAIMED <dark_gray>» <green>{killer} <gray>collected <yellow>{bounty} coins <gray>for the head of <red>{victim} <dark_gray>(<white>{streak} <gray>streak<dark_gray>)"
+    - "<red>{victim} <gray>was on top with <white>{streak} kills... until <green>{killer} <gray>showed up. <yellow>+{bounty} coins"
+    - "<green>{killer} <gray>hunted down <red>{victim} <gray>and took the <yellow>{bounty} coin <gray>bounty!"
+
+  # ending a streak that was too small to have a bounty (but at least shutdown-min-streak)
+  shutdown-messages:
+    - "<green>{killer} <gray>shut down <red>{victim}<gray>'s <white>{streak}-kill <gray>streak!"
+    - "<red>{victim}<gray>'s <white>{streak} <gray>kill streak was cut short by <green>{killer}<gray>."
+    - "<green>{killer} <gray>said <white>\"not today\" <gray>to <red>{victim}<gray>'s <white>{streak} <gray>streak."
+
+  # a streak with a bounty ended without anybody killing the player (fell, left the arena, map reset...)
+  lost-messages:
+    - "<red>{player} <gray>lost their <white>{streak}-kill <gray>streak - the <yellow>{bounty} coin <gray>bounty goes unclaimed."
+    - "<red>{player} <gray>ran away from a <white>{streak} <gray>kill streak. <dark_gray>The bounty vanishes."
+    - "<red>{player}<gray>'s <white>{streak}-kill <gray>streak fizzled out."
+
+  # milestone tiers. The key is the streak; a streak uses the highest tier at or below it,
+  # so streak 45 uses tier 30 unless you add a 45 tier. Optional: lightning: true, pitch: 0.5-2.0
+  tiers:
+    5:
+      name: "<red><bold>DOMINATING"
+      sound: entity.player.levelup
+      pitch: 1.0
+      messages:
+        - "<dark_red>☠ <red><bold>{player}</bold> <gray>is <red>Dominating <gray>with <white>{streak} streaks<gray>! <yellow>{bounty} coin bounty"
+        - "<red>{player} <gray>is <red><bold>DOMINATING</bold> <gray>- <white>{streak} kills <gray>and counting! <dark_gray>(<yellow>{bounty} coins<dark_gray>)"
+        - "<dark_red>☠ <gray>Somebody stop <red>{player}<gray>! <white>{streak} kills <gray>in a row - <yellow>{bounty} coins <gray>for their head"
+    10:
+      name: "<gold><bold>RAMPAGE"
+      sound: entity.ender_dragon.growl
+      pitch: 1.4
+      messages:
+        - "<gold>⚔ <yellow><bold>{player}</bold> <gray>is on a <gold><bold>RAMPAGE</bold> <gray>with <white>{streak} kills<gray>! <yellow>{bounty} coins <gray>on their head"
+        - "<gold>⚔ <gray>Run! <yellow>{player} <gray>is on a rampage - <white>{streak} kills <gray>and nobody can stop them"
+        - "<gold>⚔ <yellow>{player} <gray>went <gold>feral <gray>and has <white>{streak} kills<gray>. <yellow>{bounty} coin bounty"
+    15:
+      name: "<light_purple><bold>UNSTOPPABLE"
+      sound: entity.wither.spawn
+      pitch: 1.2
+      lightning: true
+      messages:
+        - "<light_purple>⚡ <white><bold>{player}</bold> <light_purple>is <bold>UNSTOPPABLE</bold> <gray>- <white>{streak} kills <gray>without dying! <yellow>{bounty} coin bounty"
+        - "<light_purple>⚡ <gray>The arena trembles... <white>{player} <gray>has <light_purple>{streak} kills <gray>and the bounty is <yellow>{bounty} coins"
+        - "<light_purple>⚡ <white>{player} <gray>cannot be stopped. <light_purple>{streak} kills<gray>. <yellow>{bounty} coins <gray>to the one who ends it"
+    20:
+      name: "<aqua><bold>GODLIKE"
+      sound: ui.toast.challenge_complete
+      pitch: 1.0
+      lightning: true
+      messages:
+        - "<aqua>✦ <white><bold>{player}</bold> <aqua>is <bold>GODLIKE</bold> <gray>with <white>{streak} kills<gray>! <yellow>{bounty} coins <gray>for the brave"
+        - "<aqua>✦ <gray>Bow down. <white>{player} <gray>reached <aqua>{streak} kills <gray>in one life. <yellow>{bounty} coin bounty"
+        - "<aqua>✦ <white>{player} <gray>plays a different game - <aqua>{streak} kills<gray>. <yellow>{bounty} coins <gray>if you dare"
+    25:
+      name: "<gradient:#ff5555:#ffaa00><bold>LEGENDARY"
+      sound: entity.lightning_bolt.thunder
+      pitch: 0.9
+      lightning: true
+      messages:
+        - "<gradient:#ff5555:#ffaa00><bold>★ LEGENDARY ★</bold></gradient> <white>{player} <gray>has <gold>{streak} kills<gray>! Bounty: <yellow>{bounty} coins"
+        - "<gradient:#ff5555:#ffaa00>★ Songs will be sung about</gradient> <white>{player} <gray>- <gold>{streak} kills <gray>in a row! <yellow>{bounty} coins"
+    30:
+      name: "<gradient:#aa00ff:#ff55ff><bold>BEYOND UNSTABLE"
+      sound: entity.ender_dragon.death
+      pitch: 1.0
+      lightning: true
+      messages:
+        - "<gradient:#aa00ff:#ff55ff><bold>☠ BEYOND UNSTABLE ☠</bold></gradient> <white>{player} <gray>has <light_purple>{streak} kills<gray>! The bounty is <yellow>{bounty} coins"
+        - "<gradient:#aa00ff:#ff55ff>☠ The server will remember this:</gradient> <white>{player} <gray>- <light_purple>{streak} kills <gray>and <yellow>{bounty} coins <gray>on their head"
